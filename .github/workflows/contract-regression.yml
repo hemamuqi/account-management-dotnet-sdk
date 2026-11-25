@@ -1,0 +1,32 @@
+name: SDK contract regression
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'EBay.AccountManagement/**'
+      - 'specs/openapi/**'
+      - '.github/workflows/contract-regression.yml'
+      - 'Directory.Build.props'
+  pull_request:
+    paths:
+      - 'EBay.AccountManagement/**'
+      - 'specs/openapi/**'
+      - '.github/workflows/contract-regression.yml'
+      - 'Directory.Build.props'
+  workflow_dispatch:
+    inputs:
+      include-errors:
+        description: Include declared 4xx responses
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    uses: hemamuqi/account-management-java-sdk/.github/workflows/dotnet-contract.yml@main
+    with:
+      sdk-project: EBay.AccountManagement/EBay.AccountManagement.csproj
+      include-errors: ${{ inputs.include-errors || false }}

@@ -5,6 +5,28 @@ Manage business policies, custom policies, rate tables, sales tax, program opt-i
 - **Target frameworks:** .NET Framework 4.7.2, .NET 8, .NET 9 and .NET 10
 - **C#:** usable from C# 7.3 and later
 
+## Contract tests
+
+The [contract workflow](.github/workflows/contract-regression.yml) calls the shared .NET
+adapter and OpenAPI runner to exercise all three REST specs against a loopback
+mock. The adapter rewrites the SDK's default base URLs to the local mock.
+It requires no eBay credentials. The caller uses the shared workflow's
+`main` branch until the new workflow is published; pin its commit SHA then.
+Run the same suite locally with .NET 10 and Node.js 22 from this repository root:
+
+```bash
+npm ci --prefix /path/to/account-management-java-sdk/tools/contract-test
+node /path/to/account-management-java-sdk/tools/contract-test/lib/runner.cjs \
+    --spec-directory specs/openapi -- \
+    dotnet run --project /path/to/account-management-java-sdk/tools/contract-test/adapters/dotnet/ContractAdapter.csproj \
+    -p:ContractSdkProject="$PWD/EBay.AccountManagement/EBay.AccountManagement.csproj"
+```
+
+Add `--errors` before `--spec-directory` to check declared 4xx responses.
+Currently six Account v1 GET cases fail because the SDK drops the declared
+`Content-Language` header. The optional error cases additionally expose two
+Finances 401 responses with undecoded error bodies.
+
 ## Installation
 
 The package `EBay.AccountManagement` is not on nuget.org yet. Reference the project, or build the package and add it to a local feed:
